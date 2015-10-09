@@ -4,23 +4,23 @@ var rx = require("rx");
 
 var stories = [
 	{
-		user: "yshay3",
-		speed: 100,
+		user: "John",
+		speed: 40,
 		routes: [["רוטשילד תל אביב", "לנדאו חולון"]]
 	},
 	{
-		user: "asaf",
-		speed: 50,
+		user: "Ofir",
+		speed: 30,
 		routes: [["רוטשילד תל אביב", "אבן גבירול תל אביב"]]
 	},
 	{
-		user: "segal",
-		speed: 140,
+		user: "Vered",
+		speed: 80,
 		routes: [["רוטשילד תל אביב", "חיפה"]]
 	},
 	{
-		user: "friend",
-		speed: 80,
+		user: "Ruth",
+		speed: 40,
 		routes: [["רוטשילד תל אביב", "גבעתיים"]]
 	}
 ]
@@ -42,15 +42,16 @@ function runRoutes(story)
 			.then(x=> L.decode(x))
 			.then(x=> {
 				var io = require('socket.io-client');
-				var socket = io.connect("http://localhost:3000/", {multiplex:false});
+				var socket = io.connect("http://localhost:3000", {multiplex:false});
 				console.log("start driving")
 				socket.emit('start driving', story.user, 33);
+				console.log(x)
 				return rx.Observable
 				.fromArray(x)
-				.zip(rx.Observable.interval(200 - story.speed), (a,b)=>a)
+				.zip(rx.Observable.interval(2000 - story.speed), (a,b)=>a)
 				.do(x=>{
 					console.log(x);
-					socket.emit('position update', new Date(), 100, JSON.stringify({longitude:x[1], latitude:x[0]}))
+					socket.emit('position update', new Date(), story.speed, JSON.stringify({longitude:x[1], latitude:x[0]}))
 				}).toPromise();
 			})
 		}).concat(rx.Observable.defer(()=>{
